@@ -1,0 +1,41 @@
+version: '3'
+
+services:
+  db:
+    image: mongo:4
+    restart: always
+    volumes:
+      - db:/data/db
+      - /etc/localtime:/etc/localtime:ro
+    env_file:
+      - db.env
+    networks:
+      - signald_network
+
+  signald:
+    image: finn/signald
+    restart: always
+    volumes:
+      - signald:/signald
+      - /etc/localtime:/etc/localtime:ro
+
+  signalbot:
+    build: ./
+    restart: always
+    volumes:
+      - signald:/signald
+      - /etc/localtime:/etc/localtime:ro
+    env_file:
+      - db.env
+    depends_on:
+      - signald
+      - db
+    networks:
+      - signald_network
+
+networks:
+  signald_network:
+
+volumes:
+  db:
+  signald:
